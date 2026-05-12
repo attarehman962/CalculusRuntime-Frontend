@@ -193,80 +193,6 @@ const ContinuityFinder = () => {
         }
     }, []);
 
-    // Analyze continuity
-    const analyzeContinuity = useCallback(async () => {
-        try {
-            if (!mathFieldRef.current) {
-                showToastMessage('Please enter a function');
-                return;
-            }
-
-            const latex = mathFieldRef.current.latex();
-            if (!latex.trim()) {
-                showToastMessage('Please enter a function');
-                return;
-            }
-
-            console.log('=== ANALYZING CONTINUITY ===');
-            console.log('LaTeX:', latex);
-            console.log('Variables:', variables);
-
-            const expr = latexToMathJs(latex);
-            console.log('Expression:', expr);
-
-            const analysisSteps = [];
-
-            // Step 1: Function identification
-            analysisSteps.push({
-                title: 'Step 1: Function Analysis',
-                explanation: `Analyzing f(${variables.map(v => v.name).join(',')}) = ${latex}`,
-                math: latex
-            });
-
-            // Step 2: Domain analysis
-            const domainAnalysis = analyzeDomain(latex, expr, variables);
-            analysisSteps.push({
-                title: 'Step 2: Domain Analysis',
-                explanation: domainAnalysis.explanation,
-                math: domainAnalysis.domainLatex
-            });
-
-            // Step 3: Check continuity at point (if specified)
-            let continuityResult = null;
-            if (analysisType === 'point') {
-                continuityResult = checkContinuityAtPoint(expr, variables);
-                analysisSteps.push({
-                    title: 'Step 3: Continuity at Point',
-                    explanation: continuityResult.explanation,
-                    math: continuityResult.math
-                });
-            } else {
-                analysisSteps.push({
-                    title: 'Step 3: General Continuity',
-                    explanation: domainAnalysis.continuityExplanation,
-                    math: domainAnalysis.continuityCondition
-                });
-            }
-
-            // Step 4: Conclusion
-            const conclusion = generateConclusion(domainAnalysis, continuityResult, variables);
-            analysisSteps.push({
-                title: 'Step 4: Conclusion',
-                explanation: conclusion.explanation,
-                math: conclusion.math
-            });
-
-            setResult(conclusion.isContinuous);
-            setSteps(analysisSteps);
-            setShowResult(true);
-            showToastMessage('Analysis complete!');
-
-        } catch (error) {
-            console.error('ERROR:', error);
-            showToastMessage('Error: ' + error.message);
-        }
-    }, [variables, analysisType, checkContinuityAtPoint, generateConclusion]);
-
     // Analyze the domain of the function
     const analyzeDomain = (latex, expr, vars) => {
         let restrictions = [];
@@ -409,6 +335,80 @@ const ContinuityFinder = () => {
             };
         }
     }, [analysisType]);
+
+    // Analyze continuity
+    const analyzeContinuity = useCallback(async () => {
+        try {
+            if (!mathFieldRef.current) {
+                showToastMessage('Please enter a function');
+                return;
+            }
+
+            const latex = mathFieldRef.current.latex();
+            if (!latex.trim()) {
+                showToastMessage('Please enter a function');
+                return;
+            }
+
+            console.log('=== ANALYZING CONTINUITY ===');
+            console.log('LaTeX:', latex);
+            console.log('Variables:', variables);
+
+            const expr = latexToMathJs(latex);
+            console.log('Expression:', expr);
+
+            const analysisSteps = [];
+
+            // Step 1: Function identification
+            analysisSteps.push({
+                title: 'Step 1: Function Analysis',
+                explanation: `Analyzing f(${variables.map(v => v.name).join(',')}) = ${latex}`,
+                math: latex
+            });
+
+            // Step 2: Domain analysis
+            const domainAnalysis = analyzeDomain(latex, expr, variables);
+            analysisSteps.push({
+                title: 'Step 2: Domain Analysis',
+                explanation: domainAnalysis.explanation,
+                math: domainAnalysis.domainLatex
+            });
+
+            // Step 3: Check continuity at point (if specified)
+            let continuityResult = null;
+            if (analysisType === 'point') {
+                continuityResult = checkContinuityAtPoint(expr, variables);
+                analysisSteps.push({
+                    title: 'Step 3: Continuity at Point',
+                    explanation: continuityResult.explanation,
+                    math: continuityResult.math
+                });
+            } else {
+                analysisSteps.push({
+                    title: 'Step 3: General Continuity',
+                    explanation: domainAnalysis.continuityExplanation,
+                    math: domainAnalysis.continuityCondition
+                });
+            }
+
+            // Step 4: Conclusion
+            const conclusion = generateConclusion(domainAnalysis, continuityResult, variables);
+            analysisSteps.push({
+                title: 'Step 4: Conclusion',
+                explanation: conclusion.explanation,
+                math: conclusion.math
+            });
+
+            setResult(conclusion.isContinuous);
+            setSteps(analysisSteps);
+            setShowResult(true);
+            showToastMessage('Analysis complete!');
+
+        } catch (error) {
+            console.error('ERROR:', error);
+            showToastMessage('Error: ' + error.message);
+        }
+    }, [variables, analysisType, checkContinuityAtPoint, generateConclusion]);
 
     return (
         <div className="app-body">
