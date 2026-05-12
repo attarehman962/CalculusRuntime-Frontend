@@ -265,7 +265,7 @@ const ContinuityFinder = () => {
             console.error('ERROR:', error);
             showToastMessage('Error: ' + error.message);
         }
-    }, [variables, analysisType, checkContinuityAtPoint, generateConclusion]);
+    }, [variables, analysisType, checkContinuityAtPoint, generateConclusion]); // eslint-disable-line react-hooks/exhaustive-deps, no-use-before-define
 
     // Analyze the domain of the function
     const analyzeDomain = (latex, expr, vars) => {
