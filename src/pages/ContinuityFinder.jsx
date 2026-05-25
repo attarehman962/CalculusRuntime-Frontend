@@ -2,6 +2,22 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import * as math from 'mathjs';
 import { latexToMathJs } from 'crosstex';
 
+const InlineMath = ({ latex }) => {
+    const ref = useRef(null);
+
+    useEffect(() => {
+        if (window.katex && ref.current) {
+            try {
+                window.katex.render(latex, ref.current, { throwOnError: false });
+            } catch {
+                ref.current.textContent = latex;
+            }
+        }
+    }, [latex]);
+
+    return <span ref={ref}>{latex}</span>;
+};
+
 const ContinuityFinder = () => {
     const [variables, setVariables] = useState([{ name: 'x', value: '0' }, { name: 'y', value: '0' }]);
     const [result, setResult] = useState(null);
@@ -153,6 +169,18 @@ const ContinuityFinder = () => {
         setTimeout(() => setToast({ show: false, message: '' }), 2000);
     };
 
+    const renderExplanation = (text) => {
+        const parts = String(text).split(/(\\\(.+?\\\))/g);
+
+        return parts.map((part, index) => {
+            if (part.startsWith('\\(') && part.endsWith('\\)')) {
+                return <InlineMath key={index} latex={part.slice(2, -2)} />;
+            }
+
+            return <React.Fragment key={index}>{part}</React.Fragment>;
+        });
+    };
+
     const addVariable = () => {
         const nextVarChar = String.fromCharCode(120 + variables.length);
         setVariables([...variables, { name: nextVarChar, value: '0' }]);
@@ -207,9 +235,9 @@ const ContinuityFinder = () => {
             const lnMatch = latex.match(/\\ln\(([^)]+)\)/) || latex.match(/\\ln\{([^}]+)\}/);
             if (lnMatch) {
                 const arg = lnMatch[1];
-                explanation = `The natural logarithm requires its argument to be positive: ${arg} > 0`;
+                explanation = `The natural logarithm requires its argument to be positive: \\(${arg} > 0\\)`;
                 domainLatex = `\\{(${vars.map(v => v.name).join(',')}) : ${arg} > 0\\}`;
-                continuityExplanation = `The function is continuous wherever ${arg} > 0`;
+                continuityExplanation = `The function is continuous wherever \\(${arg} > 0\\)`;
                 continuityCondition = arg + ' > 0';
             }
         }
@@ -220,9 +248,9 @@ const ContinuityFinder = () => {
             const sqrtMatch = latex.match(/\\sqrt\{([^}]+)\}/);
             if (sqrtMatch) {
                 const arg = sqrtMatch[1];
-                explanation = `The square root requires its argument to be non-negative: ${arg} ≥ 0`;
+                explanation = `The square root requires its argument to be non-negative: \\(${arg} \\geq 0\\)`;
                 domainLatex = `\\{(${vars.map(v => v.name).join(',')}) : ${arg} \\geq 0\\}`;
-                continuityExplanation = `The function is continuous wherever ${arg} ≥ 0`;
+                continuityExplanation = `The function is continuous wherever \\(${arg} \\geq 0\\)`;
                 continuityCondition = arg + ' \\geq 0';
             }
         }
@@ -233,9 +261,9 @@ const ContinuityFinder = () => {
             const fracMatch = latex.match(/\\frac\{[^}]+\}\{([^}]+)\}/);
             if (fracMatch) {
                 const denom = fracMatch[1];
-                explanation = `The denominator cannot be zero: ${denom} ≠ 0`;
+                explanation = `The denominator cannot be zero: \\(${denom} \\neq 0\\)`;
                 domainLatex = `\\{(${vars.map(v => v.name).join(',')}) : ${denom} \\neq 0\\}`;
-                continuityExplanation = `The function is continuous wherever ${denom} ≠ 0`;
+                continuityExplanation = `The function is continuous wherever \\(${denom} \\neq 0\\)`;
                 continuityCondition = denom + ' \\neq 0';
             }
         }
@@ -253,9 +281,9 @@ const ContinuityFinder = () => {
                 if (match && !restrictions.includes('fraction')) {
                     restrictions.push('division');
                     const divisor = match[1];
-                    explanation = `Division requires ${divisor} ≠ 0`;
+                    explanation = `Division requires \\(${divisor} \\neq 0\\)`;
                     domainLatex = `\\{(${vars.map(v => v.name).join(',')}) : ${divisor} \\neq 0\\}`;
-                    continuityExplanation = `The function is continuous wherever ${divisor} ≠ 0`;
+                    continuityExplanation = `The function is continuous wherever \\(${divisor} \\neq 0\\)`;
                     continuityCondition = divisor + ' \\neq 0';
                 }
             }
@@ -264,7 +292,7 @@ const ContinuityFinder = () => {
         // If no restrictions found
         if (restrictions.length === 0) {
             explanation = 'This function is composed of continuous elementary functions (polynomials, trigonometric functions, exponentials)';
-            continuityExplanation = `The function is continuous everywhere in its domain (all of ℝ${vars.length > 1 ? '^' + vars.length : ''})`;
+            continuityExplanation = `The function is continuous everywhere in its domain (all of \\(\\mathbb{R}${vars.length > 1 ? `^${vars.length}` : ''}\\))`;
             continuityCondition = '\\text{Continuous everywhere}';
         }
 
@@ -284,6 +312,7 @@ const ContinuityFinder = () => {
             vars.forEach(v => {
                 scope[v.name] = evaluateSpecialValue(v.value);
             });
+            const pointText = vars.map(v => `\\(${v.name}=${v.value}\\)`).join(', ');
 
             // Try to evaluate at the point
             const valueAtPoint = math.evaluate(expr, scope);
@@ -291,26 +320,27 @@ const ContinuityFinder = () => {
             if (typeof valueAtPoint === 'number' && isFinite(valueAtPoint)) {
                 return {
                     isContinuous: true,
-                    explanation: `At point (${vars.map(v => `${v.name}=${v.value}`).join(', ')}), the function equals ${valueAtPoint.toFixed(4)}. The function is defined and finite at this point.`,
+                    explanation: `At point (${pointText}), the function equals \\(${valueAtPoint.toFixed(4)}\\). The function is defined and finite at this point.`,
                     math: `f(${vars.map(v => v.value).join(',')}) = ${valueAtPoint.toFixed(4)}`
                 };
             } else if (valueAtPoint === Infinity || valueAtPoint === -Infinity) {
                 return {
                     isContinuous: false,
-                    explanation: `At point (${vars.map(v => `${v.name}=${v.value}`).join(', ')}), the function approaches infinity. The function is not continuous at this point.`,
+                    explanation: `At point (${pointText}), the function approaches infinity. The function is not continuous at this point.`,
                     math: `f(${vars.map(v => v.value).join(',')}) = ${valueAtPoint === Infinity ? '\\infty' : '-\\infty'}`
                 };
             } else {
                 return {
                     isContinuous: false,
-                    explanation: `At point (${vars.map(v => `${v.name}=${v.value}`).join(', ')}), the function is undefined.`,
+                    explanation: `At point (${pointText}), the function is undefined.`,
                     math: `f(${vars.map(v => v.value).join(',')}) = \\text{undefined}`
                 };
             }
         } catch (error) {
+            const pointText = vars.map(v => `\\(${v.name}=${v.value}\\)`).join(', ');
             return {
                 isContinuous: false,
-                explanation: `At point (${vars.map(v => `${v.name}=${v.value}`).join(', ')}), the function is undefined or has a discontinuity.`,
+                explanation: `At point (${pointText}), the function is undefined or has a discontinuity.`,
                 math: `f(${vars.map(v => v.value).join(',')}) = \\text{undefined}`
             };
         }
@@ -322,8 +352,8 @@ const ContinuityFinder = () => {
             return {
                 isContinuous: continuityResult.isContinuous ? 'Continuous' : 'Discontinuous',
                 explanation: continuityResult.isContinuous
-                    ? `The function is continuous at the point (${vars.map(v => `${v.name}=${v.value}`).join(', ')}).`
-                    : `The function is NOT continuous at the point (${vars.map(v => `${v.name}=${v.value}`).join(', ')}).`,
+                    ? `The function is continuous at the point (${vars.map(v => `\\(${v.name}=${v.value}\\)`).join(', ')}).`
+                    : `The function is NOT continuous at the point (${vars.map(v => `\\(${v.name}=${v.value}\\)`).join(', ')}).`,
                 math: continuityResult.math
             };
         } else {
@@ -362,7 +392,7 @@ const ContinuityFinder = () => {
             // Step 1: Function identification
             analysisSteps.push({
                 title: 'Step 1: Function Analysis',
-                explanation: `Analyzing f(${variables.map(v => v.name).join(',')}) = ${latex}`,
+                explanation: `Analyzing \\(f(${variables.map(v => v.name).join(',')}) = ${latex}\\)`,
                 math: latex
             });
 
@@ -1159,7 +1189,7 @@ const ContinuityFinder = () => {
                                 {steps.map((step, index) => (
                                     <div key={index} className="step-item">
                                         <div className="step-number">{step.title}</div>
-                                        <div className="step-content">{step.explanation}</div>
+                                        <div className="step-content">{renderExplanation(step.explanation)}</div>
                                         {step.math && (
                                             <div className="step-math" id={`step-math-${index}`}></div>
                                         )}
