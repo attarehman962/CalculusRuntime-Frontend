@@ -5,6 +5,7 @@ import "katex/dist/katex.min.css";
 const integrationStyles = `
 .study-guide-page {
   min-height: 100vh;
+  overflow-x: clip;
 }
 
 .partial-derivatives-guide .sidebar {
@@ -16,14 +17,23 @@ const integrationStyles = `
   gap: 0;
   height: auto;
   inset: auto;
+  left: 0;
   overflow-x: auto;
   overflow-y: hidden;
   padding: 0 2rem;
   position: sticky;
-  scrollbar-width: thin;
-  top: 64px;
+  right: 0;
+  scrollbar-width: none;
+  top: var(--header-h, 72px);
   width: 100%;
   z-index: 120;
+  -ms-overflow-style: none;
+  overscroll-behavior-x: contain;
+}
+
+.partial-derivatives-guide .sidebar::-webkit-scrollbar {
+  display: none;
+  height: 0;
 }
 
 .vector-calculus-guide nav {
@@ -208,11 +218,11 @@ const integrationStyles = `
 
 @media (max-width: 920px) {
   .partial-derivatives-guide .sidebar {
-    top: 0;
+    top: var(--header-h, 72px);
   }
 
   .vector-calculus-guide nav {
-    top: 0;
+    top: var(--header-h, 72px);
   }
 }
 
@@ -348,7 +358,37 @@ function setupMcqs(root) {
 function setupSidebar(root) {
   const sections = Array.from(root.querySelectorAll(".section[id], .mcq-section[id]"));
   const links = Array.from(root.querySelectorAll('.sb-link[href^="#"]'));
-  if (!sections.length || !links.length || !window.IntersectionObserver) return () => {};
+  if (!sections.length || !links.length) return () => {};
+
+  const sidebar = root.querySelector(".sidebar");
+  const scrollToTarget = (event) => {
+    const link = event.currentTarget;
+    const hash = link.getAttribute("href");
+    const target = hash ? root.querySelector(hash) : null;
+    if (!target) return;
+
+    event.preventDefault();
+    const headerHeight = parseFloat(
+      getComputedStyle(document.documentElement).getPropertyValue("--header-h"),
+    ) || 72;
+    const sidebarHeight = sidebar ? sidebar.getBoundingClientRect().height : 0;
+    const top =
+      target.getBoundingClientRect().top +
+      window.scrollY -
+      headerHeight -
+      sidebarHeight -
+      14;
+
+    window.history.pushState(null, "", hash);
+    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+  };
+
+  links.forEach((link) => link.addEventListener("click", scrollToTarget));
+  const cleanups = [
+    () => links.forEach((link) => link.removeEventListener("click", scrollToTarget)),
+  ];
+
+  if (!window.IntersectionObserver) return () => cleanups.forEach((cleanup) => cleanup());
 
   let lastActive = null;
   const observer = new IntersectionObserver((entries) => {
@@ -359,13 +399,14 @@ function setupSidebar(root) {
         links.forEach((item) => item.classList.remove("active"));
         link.classList.add("active");
         lastActive = link;
-        link.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        link.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
       }
     });
   }, { rootMargin: "-10% 0px -65% 0px", threshold: 0 });
 
   sections.forEach((section) => observer.observe(section));
-  return () => observer.disconnect();
+  cleanups.push(() => observer.disconnect());
+  return () => cleanups.forEach((cleanup) => cleanup());
 }
 
 function StudyGuideShell({ guideClass, styles = "", markup, children }) {
