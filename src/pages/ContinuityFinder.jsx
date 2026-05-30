@@ -1,22 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import * as math from 'mathjs';
 import { latexToMathJs } from 'crosstex';
-
-const InlineMath = ({ latex }) => {
-    const ref = useRef(null);
-
-    useEffect(() => {
-        if (window.katex && ref.current) {
-            try {
-                window.katex.render(latex, ref.current, { throwOnError: false });
-            } catch {
-                ref.current.textContent = latex;
-            }
-        }
-    }, [latex]);
-
-    return <span ref={ref}>{latex}</span>;
-};
+import { InlineMath, renderLatexToElement } from '../components/Math';
 
 const ContinuityFinder = () => {
     const [variables, setVariables] = useState([{ name: 'x', value: '0' }, { name: 'y', value: '0' }]);
@@ -72,34 +57,25 @@ const ContinuityFinder = () => {
 
     // Render KaTeX for demo examples
     useEffect(() => {
-        if (window.katex) {
-            demoExamples.forEach((example) => {
-                const el = document.getElementById(`demo-${example.num}`);
-                if (el) {
-                    try {
-                        window.katex.render(example.latex, el, { throwOnError: false });
-                    } catch {
-                        el.textContent = example.latex;
-                    }
-                }
-            });
-        }
+        demoExamples.forEach((example) => {
+            renderLatexToElement(
+                document.getElementById(`demo-${example.num}`),
+                example.latex
+            );
+        });
     }, [demoExamples]);
 
     // Render KaTeX for solution steps
     useEffect(() => {
-        if (window.katex && steps.length > 0) {
-            steps.forEach((step, index) => {
-                const el = document.getElementById(`step-math-${index}`);
-                if (el && step.math) {
-                    try {
-                        window.katex.render(step.math, el, { throwOnError: false, displayMode: true });
-                    } catch {
-                        el.textContent = step.math;
-                    }
-                }
-            });
-        }
+        steps.forEach((step, index) => {
+            if (step.math) {
+                renderLatexToElement(
+                    document.getElementById(`step-math-${index}`),
+                    step.math,
+                    { displayMode: true }
+                );
+            }
+        });
     }, [steps]);
 
     // Scroll to results

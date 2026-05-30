@@ -12,7 +12,7 @@ function Signup() {
 
   const handle = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
     setError("");
     if (!form.username.trim() || !form.password || !form.confirm) {
@@ -32,7 +32,7 @@ function Signup() {
       return;
     }
     setLoading(true);
-    const result = signup(form.username.trim(), form.password);
+    const result = await signup(form.username.trim(), form.password);
     setLoading(false);
     if (result.error) {
       setError(result.error);

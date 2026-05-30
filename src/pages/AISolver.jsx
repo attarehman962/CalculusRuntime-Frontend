@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useProgress } from "../context/ProgressContext";
 import "./AISolver.css";
@@ -8,23 +8,15 @@ const STREAMLIT_URL = "https://dapeaqzot5jtellyuyxjrf.streamlit.app/";
 function AISolver() {
   const { user } = useAuth();
   const { addSolverHistory, recordVisit } = useProgress();
-  const [loaded, setLoaded] = useState(false);
-  const [error, setError] = useState(false);
 
   useEffect(() => {
     recordVisit("ai-solver");
   }, [recordVisit]);
 
-  const handleLoad = () => {
-    setLoaded(true);
+  const handleOpenSolver = () => {
     if (user) {
       addSolverHistory({ page: "ai-solver", url: STREAMLIT_URL });
     }
-  };
-
-  const handleError = () => {
-    setError(true);
-    setLoaded(true);
   };
 
   return (
@@ -60,37 +52,25 @@ function AISolver() {
         )}
       </div>
 
-      <div className="ai-solver-frame-wrap">
-        {!loaded && (
-          <div className="ai-solver-loading">
-            <div className="ai-solver-spinner" aria-hidden="true" />
-            <p>Loading CalculusSolver…</p>
-          </div>
-        )}
-
-        {error ? (
-          <div className="ai-solver-error">
-            <p>Could not load the solver. It may be temporarily unavailable.</p>
-            <a
-              href={STREAMLIT_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="ai-solver-open-btn"
-            >
-              Open in new tab ↗
-            </a>
-          </div>
-        ) : (
-          <iframe
-            src={STREAMLIT_URL}
-            title="CalculusSolver AI"
-            className={`ai-solver-iframe${loaded ? " ai-solver-iframe--loaded" : ""}`}
-            onLoad={handleLoad}
-            onError={handleError}
-            allow="clipboard-write"
-            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
-          />
-        )}
+      <div className="ai-solver-launch">
+        <div className="ai-solver-launch-copy">
+          <div className="ai-solver-launch-kicker">Hosted solver</div>
+          <h2>Open CalculusSolver in a dedicated tab</h2>
+          <p>
+            Streamlit Cloud uses an authentication redirect that browsers block
+            inside embedded frames. Opening it directly avoids the frame error
+            and gives the solver the full page to work with.
+          </p>
+        </div>
+        <a
+          href={STREAMLIT_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ai-solver-open-btn"
+          onClick={handleOpenSolver}
+        >
+          Open solver
+        </a>
       </div>
 
       <div className="ai-solver-info">

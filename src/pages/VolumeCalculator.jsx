@@ -1,29 +1,17 @@
 
 import { useEffect, useRef, useState } from "react";
+import { InlineMath, BlockMath } from "../components/Math";
 
 // ============================================================================
 // ENHANCED DOUBLE INTEGRAL SOLVER — All Complex Cases
 // ============================================================================
 
-const LatexMath = ({ latex, displayMode = false, style }) => {
-    const ref = useRef(null);
-
-    useEffect(() => {
-        if (!ref.current) return;
-        if (!window.katex) {
-            ref.current.textContent = latex;
-            return;
-        }
-
-        try {
-            window.katex.render(latex, ref.current, { throwOnError: false, displayMode });
-        } catch {
-            ref.current.textContent = latex;
-        }
-    }, [displayMode, latex]);
-
-    return <span ref={ref} style={style}>{latex}</span>;
-};
+const LatexMath = ({ latex, displayMode = false, style }) =>
+    displayMode ? (
+        <BlockMath latex={latex} style={style} />
+    ) : (
+        <InlineMath latex={latex} style={style} />
+    );
 
 const unwrapSingleGroup = (value) => {
     if (!value.startsWith('{')) return null;

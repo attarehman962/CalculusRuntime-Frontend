@@ -12,7 +12,7 @@ function Login() {
 
   const handle = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
     setError("");
     if (!form.username.trim() || !form.password) {
@@ -20,7 +20,7 @@ function Login() {
       return;
     }
     setLoading(true);
-    const result = login(form.username.trim(), form.password);
+    const result = await login(form.username.trim(), form.password);
     setLoading(false);
     if (result.error) {
       setError(result.error);

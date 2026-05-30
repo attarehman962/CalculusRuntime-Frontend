@@ -3,6 +3,7 @@ import { createContext, useContext, useState, useCallback } from "react";
 const AuthContext = createContext(null);
 
 const STORAGE_KEY = "calcvoyager_user";
+const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8002";
 
 function loadUser() {
   try {
@@ -20,43 +21,56 @@ function saveUser(user) {
   } catch {}
 }
 
-// Minimal "user DB" stored in localStorage
-const USERS_KEY = "calcvoyager_users";
-function loadUsers() {
+async function requestAuth(path, body) {
+  let response;
   try {
-    return JSON.parse(localStorage.getItem(USERS_KEY) || "{}");
+    response = await fetch(`${API_URL}/api/auth/${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
   } catch {
-    return {};
+    return {
+      error: `Could not reach the backend at ${API_URL}. Make sure it is running on port 8002.`,
+    };
   }
-}
-function saveUsers(users) {
+
+  let data = {};
   try {
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    data = await response.json();
   } catch {}
+
+  if (!response.ok) {
+    return { error: data.detail || "Authentication failed." };
+  }
+
+  const session = {
+    ...data.user,
+    accessToken: data.access_token,
+    tokenType: data.token_type,
+  };
+  return { ok: true, user: session };
 }
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(loadUser);
 
-  const signup = useCallback((username, password) => {
-    const users = loadUsers();
-    if (users[username]) return { error: "Username already taken." };
-    const newUser = { username, createdAt: Date.now() };
-    users[username] = { password, profile: newUser };
-    saveUsers(users);
-    setUser(newUser);
-    saveUser(newUser);
-    return { ok: true };
+  const signup = useCallback(async (username, password) => {
+    const result = await requestAuth("signup", { username, password });
+    if (result.ok) {
+      setUser(result.user);
+      saveUser(result.user);
+    }
+    return result;
   }, []);
 
-  const login = useCallback((username, password) => {
-    const users = loadUsers();
-    const record = users[username];
-    if (!record) return { error: "User not found." };
-    if (record.password !== password) return { error: "Wrong password." };
-    setUser(record.profile);
-    saveUser(record.profile);
-    return { ok: true };
+  const login = useCallback(async (username, password) => {
+    const result = await requestAuth("login", { username, password });
+    if (result.ok) {
+      setUser(result.user);
+      saveUser(result.user);
+    }
+    return result;
   }, []);
 
   const logout = useCallback(() => {

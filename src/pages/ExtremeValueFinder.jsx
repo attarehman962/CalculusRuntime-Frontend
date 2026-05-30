@@ -5,27 +5,14 @@ import React, {
   useCallback,
 } from "react";
 import * as math from "mathjs";
+import { BlockMath as KatexBlockMath } from "../components/Math";
 
-const BlockMath = ({ latex }) => {
-  const ref = useRef(null);
-  useEffect(() => {
-    if (window.katex && ref.current) {
-      try {
-        window.katex.render(latex, ref.current, {
-          throwOnError: false,
-          displayMode: true,
-        });
-      } catch {
-        ref.current.textContent = latex;
-      }
-    }
-  }, [latex]);
-  return (
-    <div ref={ref} style={{ overflowX: "auto", padding: "0.5rem 0" }}>
-      {latex}
-    </div>
-  );
-};
+const BlockMath = ({ latex }) => (
+  <KatexBlockMath
+    latex={latex}
+    style={{ overflowX: "auto", padding: "0.5rem 0" }}
+  />
+);
 
 // ─── Demo examples ─────────────────────────────────────────────────────────
 const EXAMPLES = [
