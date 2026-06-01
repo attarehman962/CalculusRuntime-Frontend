@@ -590,7 +590,7 @@ function QuizMcq142() {
             {"1"}
           </div>
           <div className="mcq-q-text">
-            {"$\\displaystyle\\lim_{(x,y) o(0,0)}\\frac{xy}{x^2+y^2}$ equals:"}
+            {"$\\displaystyle\\lim_{(x,y)\\to(0,0)}\\frac{xy}{x^2+y^2}$ equals:"}
           </div>
         </div>
         <div className="mcq-options">
@@ -633,7 +633,7 @@ function QuizMcq142() {
           </div>
           <div className="mcq-explanation">
             <p>
-              {"Along $y = 0$: $\\frac{x \\cdot 0}{x^2} = 0 o 0$. Along $y = x$: $\\frac{x \\cdot x}{x^2 + x^2} =\n              \\frac{x^2}{2x^2} = \\frac{1}{2} o \\frac{1}{2}$. Since two paths give different limiting values ($0\n              eq \\frac{1}{2}$), the limit does not exist by the Two-Path Test. This is a classic example where the\n              function is well-defined everywhere except the origin, yet has no limit there."}
+              {"Along $y = 0$: $\\frac{x \\cdot 0}{x^2} \\to 0$. Along $y = x$: $\\frac{x \\cdot x}{x^2 + x^2} =\n              \\frac{x^2}{2x^2} = \\frac{1}{2} \\to \\frac{1}{2}$. Since two paths give different limiting values ($0\n              \\neq \\frac{1}{2}$), the limit does not exist by the Two-Path Test. This is a classic example where the\n              function is well-defined everywhere except the origin, yet has no limit there."}
             </p>
           </div>
         </div>
@@ -687,7 +687,7 @@ function QuizMcq142() {
           </div>
           <div className="mcq-explanation">
             <p>
-              {"Along $y = 0$: $\\frac{x^2}{x^2} = 1 o 1$. Along $x = 0$: $\\frac{-y^2}{y^2} = -1 o -1$. Different paths\n              give different values, so the limit does not exist. Since the limit does not exist, $f$ cannot be\n              continuous at the origin regardless of what value we might assign there. This is one of the textbook's\n              standard examples of a non-existent two-variable limit."}
+              {"Along $y = 0$: $\\frac{x^2}{x^2} \\to 1$. Along $x = 0$: $\\frac{-y^2}{y^2} \\to -1$. Different paths\n              give different values, so the limit does not exist. Since the limit does not exist, $f$ cannot be\n              continuous at the origin regardless of what value we might assign there. This is one of the textbook's\n              standard examples of a non-existent two-variable limit."}
             </p>
           </div>
         </div>
@@ -698,7 +698,7 @@ function QuizMcq142() {
             {"3"}
           </div>
           <div className="mcq-q-text">
-            {"$\\displaystyle\\lim_{(x,y) o(0,0)}\\frac{x^2\\sin^2 y}{x^2+2y^2}$ equals:"}
+            {"$\\displaystyle\\lim_{(x,y)\\to(0,0)}\\frac{x^2\\sin^2 y}{x^2+2y^2}$ equals:"}
           </div>
         </div>
         <div className="mcq-options">
@@ -741,7 +741,7 @@ function QuizMcq142() {
           </div>
           <div className="mcq-explanation">
             <p>
-              {"Since $\\sin^2 y \\leq y^2$ (from $|\\sin y| \\leq |y|$) and $\\frac{x^2}{x^2 + 2y^2} \\leq 1$, we bound: $0\n              \\leq \\frac{x^2\\sin^2 y}{x^2+2y^2} \\leq \\frac{x^2 y^2}{x^2+2y^2} \\leq \\frac{x^2 y^2}{2y^2} = \\frac{x^2}{2}\n              o 0$. By the Squeeze Theorem (squeezing between 0 and $x^2/2$, both tending to 0), the limit is $0$."}
+              {"Since $\\sin^2 y \\leq y^2$ (from $|\\sin y| \\leq |y|$) and $\\frac{x^2}{x^2 + 2y^2} \\leq 1$, we bound: $0\n              \\leq \\frac{x^2\\sin^2 y}{x^2+2y^2} \\leq \\frac{x^2 y^2}{x^2+2y^2} \\leq \\frac{x^2 y^2}{2y^2} = \\frac{x^2}{2}\n              \\to 0$. By the Squeeze Theorem (squeezing between 0 and $x^2/2$, both tending to 0), the limit is $0$."}
             </p>
           </div>
         </div>
@@ -2771,7 +2771,7 @@ function QuizMcq144() {
           </div>
           <div className="mcq-explanation">
             <p>
-              {"Chain rule: $\\frac{\\partial w}{\\partial r} = f_x \\frac{\\partial x}{\\partial r} + f_y \\frac{\\partial\n              y}{\\partial r}$. Now $\\frac{\\partial x}{\\partial r} = \\cos \\theta$ and $\\frac{\\partial y}{\\partial r} = \\sin\n              \\theta$ (differentiating $r\\cos \\theta$ and $r\\sin \\theta$ with respect to $r$, $ \\theta$ held fixed). So\n              $\\frac{\\partial w}{\\partial r} = f_x\\cos \\theta + f_y\\sin \\theta$. Option B gives $\\frac{\\partial w}{\\partial\n              \\theta}$ instead (using $x_ \\theta = -r\\sin \\theta$, $y_ \\theta = r\\cos \\theta$)."}
+              {"Chain rule: $\\frac{\\partial w}{\\partial r} = f_x \\frac{\\partial x}{\\partial r} + f_y \\frac{\\partial\n              y}{\\partial r}$. Now $\\frac{\\partial x}{\\partial r} = \\cos \\theta$ and $\\frac{\\partial y}{\\partial r} = \\sin\n              \\theta$ (differentiating $r\\cos \\theta$ and $r\\sin \\theta$ with respect to $r$, $\\theta$ held fixed). So\n              $\\frac{\\partial w}{\\partial r} = f_x\\cos \\theta + f_y\\sin \\theta$. Option B gives $\\frac{\\partial w}{\\partial\n              \\theta}$ instead (using $x_\\theta = -r\\sin \\theta$, $y_\\theta = r\\cos \\theta$)."}
             </p>
           </div>
         </div>

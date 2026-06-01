@@ -250,6 +250,7 @@ const integrationStyles = `
 `;
 
 function renderLatex(root) {
+  root.normalize();
   renderMathInElement(root, {
     delimiters: [
       { left: "$$", right: "$$", display: true },
